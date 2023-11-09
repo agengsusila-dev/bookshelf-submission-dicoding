@@ -138,6 +138,18 @@ function toastNotification(message, task) {
   }, 3000);
 }
 
+// const searchButton = document.getElementById("search-button");
+
+// searchButton.addEventListener("click", function (e) {
+//   const searchField = document.getElementById("search-title").value;
+//   e.preventDefault();
+
+//   const filteredBooks = books.filter((book) => {
+//     book.title.toLowerCase().includes(searchField.toLowerCase());
+//   });
+//   console.log(filteredBooks);
+// });
+
 function renderBook(bookObject) {
   const { id, title, author, year, isComplete } = bookObject;
   let row = document.createElement("tr");
@@ -161,16 +173,10 @@ function renderBook(bookObject) {
     removeBook(id);
   });
 
-  const searchButton = document.getElementById("search-button");
-  const titleSearch = document.getElementById("search-title").value;
-  const search = books.filter(function (book) {
-    return book.title == titleSearch;
-  });
-
-  searchButton.addEventListener("click", function () {
-    console.log(titleSearch);
-    console.log(search);
-  });
+  // searchButton.addEventListener("click", function () {
+  //   console.log(titleSearch);
+  //   console.log(search);
+  // });
 
   const undoButton = document.createElement("input");
   undoButton.role = "button";
@@ -210,21 +216,84 @@ function renderBook(bookObject) {
   return row;
 }
 
+// document.addEventListener(RENDER_EVENT, function () {
+//   const uncompleteBookList = document.getElementById("uncomplete-book-list");
+//   uncompleteBookList.innerHTML = "";
+
+//   const completeBookList = document.getElementById("complete-book-list");
+//   completeBookList.innerHTML = "";
+
+//   const searchButton = document.getElementById("search-button");
+//   const titleKeyword = document
+//     .getElementById("search-title")
+//     .value.toLowerCase();
+
+//   if (searchButton.addEventListener("click")) {
+//     const filteredBooks = books.filter((book) => {
+//       book.title.toLowerCase().includes(titleKeyword);
+//     });
+//     for (const bookItem of filteredBooks) {
+//       const bookElement = renderBook(bookItem);
+//       if (bookItem.isComplete) {
+//         completeBookList.append(bookElement);
+//       } else {
+//         uncompleteBookList.append(bookElement);
+//       }
+//     }
+//   } else {
+//     for (const bookItem of books) {
+//       const bookElement = renderBook(bookItem);
+//       if (bookItem.isComplete) {
+//         completeBookList.append(bookElement);
+//       } else {
+//         uncompleteBookList.append(bookElement);
+//       }
+//     }
+//   }
+// });
+
 document.addEventListener(RENDER_EVENT, function () {
   const uncompleteBookList = document.getElementById("uncomplete-book-list");
-  uncompleteBookList.innerHTML = "";
-
   const completeBookList = document.getElementById("complete-book-list");
-  completeBookList.innerHTML = "";
+  const searchForm = document.getElementById("search-form");
+  let isFormSubmitted = false;
 
-  for (const bookItem of books) {
-    const bookElement = renderBook(bookItem);
-    if (bookItem.isComplete) {
-      completeBookList.append(bookElement);
-    } else {
-      uncompleteBookList.append(bookElement);
+  // Fungsi untuk merender buku ke dalam daftar
+  function renderBooks(books) {
+    // Hapus semua buku yang ada sebelumnya
+    uncompleteBookList.innerHTML = "";
+    completeBookList.innerHTML = "";
+
+    // Render buku ke dalam daftar sesuai kategori (complete/incomplete)
+    for (const bookItem of books) {
+      const bookElement = renderBook(bookItem);
+      if (bookItem.isComplete) {
+        completeBookList.append(bookElement);
+      } else {
+        uncompleteBookList.append(bookElement);
+      }
     }
   }
+
+  // Event listener untuk formulir
+  searchForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+    isFormSubmitted = true;
+
+    const titleKeyword = document
+      .getElementById("search-title")
+      .value.toLowerCase();
+
+    const filteredBooks = books.filter((book) =>
+      book.title.toLowerCase().includes(titleKeyword)
+    );
+
+    // Render buku hasil pemfilteran
+    renderBooks(filteredBooks);
+  });
+
+  // Render buku secara default saat halaman dimuat
+  renderBooks(books);
 });
 
 document.addEventListener("DOMContentLoaded", function () {
