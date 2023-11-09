@@ -5,22 +5,94 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bookshelf Submission</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+  <link rel="stylesheet" href="css/main.css">
 </head>
 
 <body>
-  <form action="">
-    <label for="title">Book's Title</label>
-    <input type="text" name="title" id="title">
+  <header class="container">
+    <hgroup>
+      <h2>Bookshelf Submission</h2>
+      <h3>Using web storage.</h3>
+    </hgroup>
+  </header>
+  <main class="container">
+    <form action="#" id="form">
+      <label for="title">Book's Title
+        <input type="text" name="title" id="title">
+      </label>
 
-    <label for="author">Author</label>
-    <input type="text" name="author" id="author">
+      <div class="grid">
+        <label for="author">Author
+          <input type="text" name="author" id="author">
+        </label>
+        <label for="year">Release Year
+          <input type="text" name="year" id="year">
+        </label>
+      </div>
+      <fieldset>
+        <label for="isComplete">
+          <input type="checkbox" id="isComplete" name="isComplete">
+          Finished?
+        </label>
+      </fieldset>
+      <input type="submit" id="submitButton" value="Submit Books">
+    </form>
+    <form action="#" id="search-form">
+      <label for="search-title">Search Book
+        <input type="text" name="search-title" id="search-title">
+      </label>
+      <input type="submit" id="search-button" value="Search Book">
+    </form>
+    <div class="grid">
+      <div>
+        <h4><mark><s>Complete</s> Books</mark></h4>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Title</th>
+          <th scope="col">Author</th>
+          <th scope="col">Year</th>
+          <th scope="col">Action</th>
+        </tr>
+      </thead>
+      <tbody id="uncomplete-book-list">
+      </tbody>
+    </table>
+    <div class="grid">
+      <div>
+        <h4><mark>Complete Books</mark></h4>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Title</th>
+          <th scope="col">Author</th>
+          <th scope="col">Year</th>
+          <th scope="col">Action</th>
+        </tr>
+      </thead>
+      <tbody id="complete-book-list">
+      </tbody>
+    </table>
 
-    <label for="year">Release Year</label>
-    <input type="text" name="year" id="year">
+    <div id="toast">
+      <span id="toast-message-name"></span><span id="toast-message"></span>
+    </div>
+  </main>
+  <footer class="container">
+    <div class="grid">
+      <div>Copyrighted by Ageng Susila</div>
+    </div>
+  </footer>
 
-    <label for="isFinished">Finished?</label>
-    <input type="checkbox" name="isFinished" id="isFinished">
-  </form>
+
+
+
+  <script src="js/main.js"></script>
 </body>
 
 </html>
