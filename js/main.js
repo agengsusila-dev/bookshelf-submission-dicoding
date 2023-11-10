@@ -3,16 +3,76 @@ const RENDER_EVENT = "render-book";
 const SAVED_EVENT = "saved-book";
 const STORAGE_KEY = "BOOKSHELF_APPS";
 
+//Modal Config
+const isOpenClass = "modal-is-open";
+const openingClass = "modal-is-opening";
+const closingClass = "modal-is-closing";
+const animationDuration = 400; // ms
+let visibleModal = null;
+
+function toggleModal(event) {
+  event.preventDefault();
+  const modal = document.getElementById(
+    event.currentTarget.getAttribute("data-target")
+  );
+  typeof modal != "undefined" && modal != null && isModalOpen(modal)
+    ? closeModal(modal)
+    : openModal(modal);
+}
+
+// Is modal open
+function isModalOpen(modal) {
+  return modal.hasAttribute("open") && modal.getAttribute("open") != "false"
+    ? true
+    : false;
+}
+
+// Open modal
+function openModal(modal) {
+  document.documentElement.classList.add(isOpenClass, openingClass);
+  setTimeout(() => {
+    visibleModal = modal;
+    document.documentElement.classList.remove(openingClass);
+  }, animationDuration);
+  modal.setAttribute("open", true);
+}
+
+// Close modal
+function closeModal(modal) {
+  visibleModal = null;
+  document.documentElement.classList.add(closingClass);
+  setTimeout(() => {
+    document.documentElement.classList.remove(closingClass, isOpenClass);
+    modal.removeAttribute("open");
+  }, animationDuration);
+}
+
+// Close with a click outside
+document.addEventListener("click", (event) => {
+  if (visibleModal != null) {
+    const modalContent = visibleModal.querySelector("article");
+    const isClickInside = modalContent.contains(event.target);
+    !isClickInside && closeModal(visibleModal);
+  }
+});
+
+// Close with Esc key
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && visibleModal != null) {
+    closeModal(visibleModal);
+  }
+});
+
 function generateId() {
   return +new Date();
 }
 
 function generateBookObject(id, title, author, year, isComplete) {
   return {
-    id,
+    id: Number(id),
     title,
     author,
-    year,
+    year: Number(year),
     isComplete,
   };
 }
@@ -32,7 +92,29 @@ function findBook(bookId) {
       return bookItem;
     }
   }
-  return null;
+  return console.log("Buku tidak ditemukan!");
+}
+
+function updateBook(bookId) {
+  const bookTarget = findBook(Number(bookId));
+  if (bookTarget == null) return;
+  const title = bookTarget.title;
+
+  const updateTitle = document.getElementById("update-title").value;
+  const updateAuthor = document.getElementById("update-author").value;
+  const updateYear = document.getElementById("update-year").value;
+  const isComplete = document.getElementById("update-isComplete").checked;
+
+  bookTarget.title = updateTitle;
+  bookTarget.author = updateAuthor;
+  bookTarget.year = Number(updateYear);
+  bookTarget.isCompleted = isComplete;
+
+  document.dispatchEvent(new Event(RENDER_EVENT));
+  const bookTitle = `${title}`;
+  const message = ` sucessfully updated.`;
+  toastNotification(message, bookTitle);
+  saveData();
 }
 
 function isStorageExist() {
@@ -74,9 +156,9 @@ function addBook() {
   const bookObject = generateBookObject(id, title, author, year, isComplete);
 
   books.push(bookObject);
-  const task = `${title}`;
+  const bookTitle = `${title}`;
   const message = ` added to list.`;
-  toastNotification(message, task);
+  toastNotification(message, bookTitle);
   document.dispatchEvent(new Event(RENDER_EVENT));
   saveData();
 }
@@ -87,9 +169,9 @@ function removeBook(bookId) {
   if (bookTarget === -1) return;
 
   const title = bookTargetProperties.title;
-  const task = `${title}`;
+  const bookTitle = `${title}`;
   const message = ` successfully removed.`;
-  toastNotification(message, task);
+  toastNotification(message, bookTitle);
   books.splice(bookTarget, 1);
   document.dispatchEvent(new Event(RENDER_EVENT));
   saveData();
@@ -102,9 +184,9 @@ function addBookToComplete(bookId) {
 
   bookTarget.isComplete = true;
   const title = bookTarget.title;
-  const task = `${title}`;
+  const bookTitle = `${title}`;
   const message = ` added to complete.`;
-  toastNotification(message, task);
+  toastNotification(message, bookTitle);
   document.dispatchEvent(new Event(RENDER_EVENT));
   saveData();
 }
@@ -117,19 +199,19 @@ function undoBookFromComplete(bookId) {
   bookTarget.isComplete = false;
 
   const title = bookTarget.title;
-  const task = `${title}`;
+  const bookTitle = `${title}`;
   const message = ` added to uncomplete.`;
-  toastNotification(message, task);
+  toastNotification(message, bookTitle);
   document.dispatchEvent(new Event(RENDER_EVENT));
   saveData();
 }
 
-function toastNotification(message, task) {
+function toastNotification(message, bookTitle) {
   const toast = document.getElementById("toast");
   const toastMessage = document.getElementById("toast-message");
   const toastMessageName = document.getElementById("toast-message-name");
 
-  toastMessageName.innerText = task;
+  toastMessageName.innerText = bookTitle;
   toastMessage.innerText = message;
   toast.className = "show";
 
@@ -137,18 +219,6 @@ function toastNotification(message, task) {
     toast.className = toast.className.replace("show", "");
   }, 3000);
 }
-
-// const searchButton = document.getElementById("search-button");
-
-// searchButton.addEventListener("click", function (e) {
-//   const searchField = document.getElementById("search-title").value;
-//   e.preventDefault();
-
-//   const filteredBooks = books.filter((book) => {
-//     book.title.toLowerCase().includes(searchField.toLowerCase());
-//   });
-//   console.log(filteredBooks);
-// });
 
 function renderBook(bookObject) {
   const { id, title, author, year, isComplete } = bookObject;
@@ -173,10 +243,37 @@ function renderBook(bookObject) {
     removeBook(id);
   });
 
-  // searchButton.addEventListener("click", function () {
-  //   console.log(titleSearch);
-  //   console.log(search);
-  // });
+  const updateButton = document.createElement("input");
+  updateButton.role = "button";
+  updateButton.type = "button";
+  updateButton.id = "action-button";
+  updateButton.className = "secondary outline";
+  updateButton.setAttribute("data-target", "update-modal");
+  updateButton.onclick = toggleModal;
+  updateButton.value = "Update";
+
+  updateButton.addEventListener("click", function () {
+    const bookItem = findBook(Number(id));
+    const updateForm = document.getElementById("update-form");
+
+    const textTitle = document.getElementById("update-title");
+    const textAuthor = document.getElementById("update-author");
+    const textYear = document.getElementById("update-year");
+    const isComplete = document.getElementById("update-isComplete");
+
+    textTitle.value = bookItem.title;
+    textAuthor.value = bookItem.author;
+    textYear.value = bookItem.year;
+    isComplete.checked = bookItem.isComplete;
+
+    updateForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+      updateBook(id);
+      const modal = visibleModal;
+      closeModal(modal);
+      toggleModal(false);
+    });
+  });
 
   const undoButton = document.createElement("input");
   undoButton.role = "button";
@@ -206,51 +303,17 @@ function renderBook(bookObject) {
   if (isComplete == false) {
     cell4.appendChild(actionCell);
     actionCell.appendChild(checkButton);
+    actionCell.appendChild(updateButton);
     actionCell.appendChild(removeButton);
   } else {
     cell4.appendChild(actionCell);
     actionCell.appendChild(undoButton);
+    actionCell.appendChild(updateButton);
     actionCell.appendChild(removeButton);
   }
 
   return row;
 }
-
-// document.addEventListener(RENDER_EVENT, function () {
-//   const uncompleteBookList = document.getElementById("uncomplete-book-list");
-//   uncompleteBookList.innerHTML = "";
-
-//   const completeBookList = document.getElementById("complete-book-list");
-//   completeBookList.innerHTML = "";
-
-//   const searchButton = document.getElementById("search-button");
-//   const titleKeyword = document
-//     .getElementById("search-title")
-//     .value.toLowerCase();
-
-//   if (searchButton.addEventListener("click")) {
-//     const filteredBooks = books.filter((book) => {
-//       book.title.toLowerCase().includes(titleKeyword);
-//     });
-//     for (const bookItem of filteredBooks) {
-//       const bookElement = renderBook(bookItem);
-//       if (bookItem.isComplete) {
-//         completeBookList.append(bookElement);
-//       } else {
-//         uncompleteBookList.append(bookElement);
-//       }
-//     }
-//   } else {
-//     for (const bookItem of books) {
-//       const bookElement = renderBook(bookItem);
-//       if (bookItem.isComplete) {
-//         completeBookList.append(bookElement);
-//       } else {
-//         uncompleteBookList.append(bookElement);
-//       }
-//     }
-//   }
-// });
 
 document.addEventListener(RENDER_EVENT, function () {
   const uncompleteBookList = document.getElementById("uncomplete-book-list");
@@ -258,13 +321,10 @@ document.addEventListener(RENDER_EVENT, function () {
   const searchForm = document.getElementById("search-form");
   let isFormSubmitted = false;
 
-  // Fungsi untuk merender buku ke dalam daftar
   function renderBooks(books) {
-    // Hapus semua buku yang ada sebelumnya
     uncompleteBookList.innerHTML = "";
     completeBookList.innerHTML = "";
 
-    // Render buku ke dalam daftar sesuai kategori (complete/incomplete)
     for (const bookItem of books) {
       const bookElement = renderBook(bookItem);
       if (bookItem.isComplete) {
@@ -275,7 +335,6 @@ document.addEventListener(RENDER_EVENT, function () {
     }
   }
 
-  // Event listener untuk formulir
   searchForm.addEventListener("submit", function (event) {
     event.preventDefault();
     isFormSubmitted = true;
@@ -288,11 +347,9 @@ document.addEventListener(RENDER_EVENT, function () {
       book.title.toLowerCase().includes(titleKeyword)
     );
 
-    // Render buku hasil pemfilteran
     renderBooks(filteredBooks);
   });
 
-  // Render buku secara default saat halaman dimuat
   renderBooks(books);
 });
 

@@ -9,7 +9,7 @@ header {
 }
 
 #action-button {
-  width: 10rem;
+  width: 5rem;
   height: fit-content;
   padding: 0.5rem;
   margin-top: 1rem;
@@ -21,6 +21,10 @@ table tr td {
 
 footer {
   text-align: center;
+}
+
+footer button {
+  width: fit-content;
 }
 
 #toast {

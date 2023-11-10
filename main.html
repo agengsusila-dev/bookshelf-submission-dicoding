@@ -78,7 +78,40 @@
       <tbody id="complete-book-list">
       </tbody>
     </table>
+    <dialog id="update-modal">
+      <article>
+        <a href="#close" aria-label="Close" class="close" data-target="update-modal" onClick="toggleModal(event)">
+        </a>
+        <h3>Confirm your action!</h3>
+        <form action="#" id="update-form">
+          <label for="title">Book's Title
+            <input type="text" name="update-title" id="update-title">
+          </label>
 
+          <div class="grid">
+            <label for="author">Author
+              <input type="text" name="update-author" id="update-author">
+            </label>
+            <label for="year">Release Year
+              <input type="text" name="update-year" id="update-year">
+            </label>
+          </div>
+          <fieldset>
+            <label for="isComplete">
+              <input type="checkbox" id="update-isComplete" name="update-isComplete">
+              Finished?
+            </label>
+          </fieldset>
+          <button id="submitButton" role="button" type="submit">
+            Confirm
+          </button>
+          <button role="button" class="secondary" data-target="update-modal" onClick="toggleModal(event)">
+            Cancel
+          </button>
+        </form>
+
+      </article>
+    </dialog>
     <div id="toast">
       <span id="toast-message-name"></span><span id="toast-message"></span>
     </div>
